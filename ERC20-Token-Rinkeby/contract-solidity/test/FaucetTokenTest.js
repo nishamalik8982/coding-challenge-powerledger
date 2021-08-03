@@ -12,30 +12,23 @@ contract("CodeScreenContract", accounts => {
         instance = await FaucetTokenContract.new({from: accounts[0]});
     });
 
-    it("getFaucet: user1 send request to owner, owner send 1000 faucet to user1", async function() {
-        await instance.getFaucet(user1, 100000000, {from: accounts[0]});
+    it("getFaucet: user1 send request to owner, owner send 100000 faucet to user1", async function() {
+        await instance.getFaucet(user1, 100000, {from: accounts[0]});
         const balance = await instance.balanceOf(user1);
-        assert.equal(balance, 100000000);
+        assert.equal(balance, 100000);
     });
 
-    it("getFaucet: users only request at most 1000 faucet, otherwise get error", async function() {
+    it("getFaucet: users only request at most 100000 faucet, otherwise get error", async function() {
         await truffleAssert.reverts(
-            instance.getFaucet(user1, 1000000000, { from: accounts[0] }),
+            instance.getFaucet(user1, 1000000, { from: accounts[0] }),
             "FaucetToken: cannot get more than 100 tokens at once"
         );
     });
 
-    it("getFaucet: users only request to owner, otherwise get error", async function() {
-        await truffleAssert.reverts(
-            instance.getFaucet(user1, 1000000000, { from: user2 }),
-            "Ownable: caller is not the owner"
-        );
-    });
-
     it("getFaucet: user2 send request to owner, owner send 1000 faucet to user2", async function() {
-        await instance.getFaucet(user2, 100000000, {from: accounts[0]})
+        await instance.getFaucet(user2, 100000, {from: accounts[0]})
         const balance = await instance.balanceOf(user2);
-        assert.equal(balance, 100000000);
+        assert.equal(balance, 100000);
     });
 
     it("getFaucet: user2 send request to owner, owner send 1000 faucet to user2", async function() {
@@ -45,13 +38,13 @@ contract("CodeScreenContract", accounts => {
     });
 
     it("getFaucet: user3 send request to owner, owner send 1000 faucet to user3", async function() {
-        await instance.getFaucet(user3, 100000000, {from: accounts[0]})
+        await instance.getFaucet(user3, 100000, {from: accounts[0]})
         const balance = await instance.balanceOf(user3);
-        assert.equal(balance, 100000000);
+        assert.equal(balance, 100000);
     });
 
     it("getRemainingDailyLimit: get remaining daily limit", async function() {
         const balance = await instance.getDailyRemainingAmount();
-        assert.equal(balance, 9600000000);
+        assert.equal(balance, 960000);
     });
 });

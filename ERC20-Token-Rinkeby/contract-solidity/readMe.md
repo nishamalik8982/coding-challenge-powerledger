@@ -1,7 +1,7 @@
 # ERC20 FaucetToken Contract
 
 ## Rinkeby Contract Address
-https://rinkeby.etherscan.io/address/0x82aE39e92f8c2c6De12f8bFCc30A17429E0d2eb5#code
+https://rinkeby.etherscan.io/address/0x650d2bca17aaf6b5979b53b221d409984ae887e8#code
 
 This contract is faucet token contract.
 
@@ -64,12 +64,12 @@ contract FaucetToken is ERC20Burnable, Ownable {
         return balanceAfter > balanceBefore;
     }
 
-    // send amount of faucet token to recipient, only callable by contract deployer(owner)
-    // users send faucet request to contract owner, then owner send faucet token to requested user using this method
-    // notice: request amount should not exceed 1000, global amount of users should not exceed globalLimit, requested daily amount should not exceed daily limit
-    function getFaucet(address recipient, uint256 amount) external onlyOwner {
-        require(amount <= 1000 * 10 ** 5, "FaucetToken: cannot get more than 100 tokens at once");
-        require(globalAmount[recipient].add(amount) <= globalLimit, "FaucetToken: exceed global limit per address");
+    // send amount of faucet token to recipient, anybody can call this function
+    // request amount should not exceed 1000, global amount of users should not exceed globalLimit, requested daily amount should not exceed daily limit
+    function getFaucet(address recipient, uint256 amount) external {
+        require(amount >= 0, "FaucetToken: cannot get more than 100 tokens at once");
+        require(amount <= 100000, "FaucetToken: cannot get more than 100 tokens at once");
+        require(globalAmount[msg.sender].add(amount) <= globalLimit, "FaucetToken: exceed global limit per address");
 
         if(block.timestamp > nextDayTimestamp){
             dailyAmount = 0;
@@ -77,9 +77,9 @@ contract FaucetToken is ERC20Burnable, Ownable {
         }
 
         require(dailyAmount.add(amount) <= dailyLimit, "FaucetToken: exceed daily limit");
-        mint(recipient, amount);
+        mint(msg.sender, amount);
         dailyAmount = dailyAmount.add(amount);
-        globalAmount[recipient] = globalAmount[recipient].add(amount);
+        globalAmount[msg.sender] = globalAmount[msg.sender].add(amount);
     }
 
     // this is ERC20 standard method, check state before token transfer

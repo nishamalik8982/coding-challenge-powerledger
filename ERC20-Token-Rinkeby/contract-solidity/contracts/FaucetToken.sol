@@ -11,20 +11,19 @@ contract FaucetToken is ERC20Burnable, Ownable {
 
     using SafeMath for uint256;
 
-    uint256 public constant globalLimit = 10000000 * 10 ** 5;   // global limit per address
-    uint256 public constant dailyLimit = 100000 * 10 ** 5;      // daily limit per day
-    uint256 public constant dailyTime = 86400;  // 24 hours = 86400 seconds
-    uint256 public nextDayTimestamp;
-    uint256 public dailyAmount = 0;
- 
+    uint256 public constant globalLimit = 10000000;         // global limit per address
+    uint256 public constant dailyLimit = 100000;            // daily limit per day
+    uint256 public constant dailyTime = 86400;              // 24 hours = 86400 seconds
+    uint256 public nextDayTimestamp;                        // next day timestamp
+    uint256 public dailyAmount = 0;                         // requested amount current day
+
     // stores global amount of all addresses
     mapping(address => uint256) public globalAmount;
-    
-    // constructer: token Name - Faucet Token, Token Symbol - Faucet
+
+    // constructor: token Name - Faucet Token, Token Symbol - Faucet
     constructor() ERC20("Faucet Token", "Faucet") {
         nextDayTimestamp = block.timestamp.add(dailyTime);
     }
-
     // mint amount of token to recipient, only callable by contract deployer(owner)
     function mint(address recipient, uint256 amount) public onlyOwner returns (bool) {
         uint256 balanceBefore = balanceOf(recipient);
@@ -33,12 +32,12 @@ contract FaucetToken is ERC20Burnable, Ownable {
         return balanceAfter > balanceBefore;
     }
 
-    // send amount of faucet token to recipient, only callable by contract deployer(owner)
-    // users send faucet request to contract owner, then owner send faucet token to requested user using this method
-    // notice: request amount should not exceed 1000, global amount of users should not exceed globalLimit, requested daily amount should not exceed daily limit
-    function getFaucet(address recipient, uint256 amount) external onlyOwner {
-        require(amount <= 1000 * 10 ** 5, "FaucetToken: cannot get more than 100 tokens at once");
-        require(globalAmount[recipient].add(amount) <= globalLimit, "FaucetToken: exceed global limit per address");
+    // send amount of faucet token to recipient, anybody can call this function
+    // request amount should not exceed 1000, global amount of users should not exceed globalLimit, requested daily amount should not exceed daily limit
+    function getFaucet(address recipient, uint256 amount) external {
+        require(amount >= 0, "FaucetToken: cannot get more than 100 tokens at once");
+        require(amount <= 100000, "FaucetToken: cannot get more than 100 tokens at once");
+        require(globalAmount[msg.sender].add(amount) <= globalLimit, "FaucetToken: exceed global limit per address");
 
         if(block.timestamp > nextDayTimestamp){
             dailyAmount = 0;
@@ -46,9 +45,9 @@ contract FaucetToken is ERC20Burnable, Ownable {
         }
 
         require(dailyAmount.add(amount) <= dailyLimit, "FaucetToken: exceed daily limit");
-        mint(recipient, amount);
+        mint(msg.sender, amount);
         dailyAmount = dailyAmount.add(amount);
-        globalAmount[recipient] = globalAmount[recipient].add(amount);
+        globalAmount[msg.sender] = globalAmount[msg.sender].add(amount);
     }
 
     // this is ERC20 standard method, check state before token transfer
