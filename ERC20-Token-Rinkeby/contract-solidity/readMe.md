@@ -34,10 +34,10 @@ contract FaucetToken is ERC20Burnable, Ownable {
     using SafeMath for uint256;
 
     // stores global limit per address
-    uint256 public constant globalLimit = 10000000 * 10 ** 5;   // global limit per address
+    uint256 public constant globalLimit = 10000000;   // global limit per address
 
     // stores daily limit per day
-    uint256 public constant dailyLimit = 100000 * 10 ** 5;      // daily limit per day
+    uint256 public constant dailyLimit = 100000;      // daily limit per day
 
     // stores next day's timestamp
     uint256 public constant dailyTime = 86400;  // 24 hours = 86400 seconds
